@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lipidos-analysis-tool"
+version = "1.0.0"
+authors = [
+    {name = "Marco Zachary Moreno Bautista", email = "marco.moreno@ipicyt.edu.mx"},
+]
+description = "riglyceride Localization via Edge-Triggered Segmentation System"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "opencv-python>=4.8.0",
+    "numpy>=1.24.0",
+    "matplotlib>=3.7.0",
+    "pandas>=2.0.0",
+]
+
+[project.scripts]
+lipidos-analysis = "src.main:main"
