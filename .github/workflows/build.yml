@@ -27,7 +27,7 @@ jobs:
     
     - name: Build macOS executable
       run: |
-        pyinstaller --name="LipidosAnalyzer" \
+        pyinstaller --name="Triglyceride_Localization_via_Edge-Triggered_Segmentation_System" \
                     --windowed \
                     --onefile \
                     --add-data="src:src" \
@@ -42,17 +42,17 @@ jobs:
     
     - name: Create DMG
       run: |
-        mkdir -p Triglyceride Localization via Edge-Triggered Segmentation System.app/Contents/MacOS
-        cp dist/Triglyceride Localization via Edge-Triggered Segmentation System Triglyceride Localization via Edge-Triggered Segmentation System.app/Contents/MacOS/
-        hdiutil create -volname "Triglyceride Localization via Edge-Triggered Segmentation System" \
-                      -srcfolder Triglyceride Localization via Edge-Triggered Segmentation System.app \
+        mkdir -p Triglyceride_Localization_via_Edge-Triggered_Segmentation_System.app/Contents/MacOS
+        cp dist/Triglyceride_Localization_via_Edge-Triggered_Segmentation_System Triglyceride_Localization_via_Edge-Triggered_Segmentation_System.app/Contents/MacOS/
+        hdiutil create -volname "Triglyceride_Localization_via_Edge-Triggered_Segmentation_System" \
+                      -srcfolder Triglyceride_Localization_via_Edge-Triggered_Segmentation_System.app \
                       -ov -format UDZO \
-                      dist/Triglyceride Localization via Edge-Triggered Segmentation System.dmg
+                      dist/Triglyceride_Localization_via_Edge-Triggered_Segmentation_System.dmg
     
     - name: Upload artifact
       uses: actions/upload-artifact@v3
       with:
         name: LipidosAnalyzer-macOS
         path: |
-          dist/Triglyceride Localization via Edge-Triggered Segmentation System
-          dist/Triglyceride Localization via Edge-Triggered Segmentation System.dmg
+          dist/Triglyceride_Localization_via_Edge-Triggered_Segmentation_System
+          dist/Triglyceride_Localization_via_Edge-Triggered_Segmentation_System.dmg
