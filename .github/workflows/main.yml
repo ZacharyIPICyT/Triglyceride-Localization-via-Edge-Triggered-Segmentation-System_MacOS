@@ -1,0 +1,58 @@
+name: Build Executables
+
+on:
+  push:
+    tags:
+      - 'v*'
+  release:
+    types: [created]
+
+jobs:
+  build-mac:
+    runs-on: macos-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pyinstaller
+    
+    - name: Build macOS executable
+      run: |
+        pyinstaller --name="LipidosAnalyzer" \
+                    --windowed \
+                    --onefile \
+                    --add-data="src:src" \
+                    --clean \
+                    --noconfirm \
+                    --hidden-import="matplotlib.backends.backend_agg" \
+                    --hidden-import="cv2" \
+                    --hidden-import="PIL" \
+                    --collect-all="cv2" \
+                    --collect-all="matplotlib" \
+                    src/main.py
+    
+    - name: Create DMG
+      run: |
+        mkdir -p LipidosAnalyzer.app/Contents/MacOS
+        cp dist/LipidosAnalyzer LipidosAnalyzer.app/Contents/MacOS/
+        hdiutil create -volname "Lipidos Analyzer" \
+                      -srcfolder LipidosAnalyzer.app \
+                      -ov -format UDZO \
+                      dist/LipidosAnalyzer.dmg
+    
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: LipidosAnalyzer-macOS
+        path: |
+          dist/LipidosAnalyzer
+          dist/LipidosAnalyzer.dmg
