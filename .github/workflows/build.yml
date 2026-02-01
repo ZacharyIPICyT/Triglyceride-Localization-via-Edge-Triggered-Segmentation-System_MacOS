@@ -52,7 +52,7 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-artifact@v3
       with:
-        name: LipidosAnalyzer-macOS
+        name: Triglyceride_Localization_via_Edge-Triggered_Segmentation_System-macOS
         path: |
           dist/Triglyceride_Localization_via_Edge-Triggered_Segmentation_System
           dist/Triglyceride_Localization_via_Edge-Triggered_Segmentation_System.dmg
