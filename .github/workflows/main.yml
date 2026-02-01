@@ -1,66 +1,82 @@
-name: Test and Build
+name: Build Executables
 
 on:
+  workflow_dispatch:  # Permite ejecución manual
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version to build'
-        required: true
-        default: '1.0.0'
+    tags:
+      - 'v*'
+  release:
+    types: [created]
+
+permissions:
+  contents: write  # Necesario para v4 de upload-artifact
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    
-    steps:
-    - uses: actions/checkout@v3
-    
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.9'
-    
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-    
-    - name: Test Python script
-      run: |
-        python -c "import cv2; import numpy; print('OpenCV version:', cv2.__version__)"
-        python -c "import sys; sys.path.insert(0, 'src'); from main import CellCultureAnalysisSystem; print('Import successful!')"
-  
   build-mac:
-    needs: test
     runs-on: macos-latest
     
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v4  # También actualizado a v4
     
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5  # Actualizado a v5
       with:
         python-version: '3.9'
     
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install pyinstaller
+        pip install opencv-python numpy matplotlib pandas pyinstaller
     
     - name: Build executable
       run: |
-        cd src
-        pyinstaller --onefile --name LipidosAnalyzer main.py
+        # Crear directorio de build
+        mkdir -p build
+        cd build
+        
+        # Copiar código fuente
+        cp -r ../src/* .
+        
+        # Construir con PyInstaller
+        pyinstaller --onefile \
+                    --name LipidosAnalyzer \
+                    --hidden-import matplotlib.backends.backend_agg \
+                    --hidden-import cv2 \
+                    --hidden-import PIL \
+                    main.py
+        
+        echo "✅ Build completed"
         ls -la dist/
     
-    - name: Upload artifact
-      uses: actions/upload-artifact@v3
+    - name: Upload executable
+      uses: actions/upload-artifact@v4  # ¡ACTUALIZADO A v4!
       with:
-        name: macos-executable
-        path: src/dist/LipidosAnalyzer
-        if-no-files-found: error
+        name: LipidosAnalyzer-macOS
+        path: build/dist/LipidosAnalyzer
+        retention-days: 7
+    
+    - name: Create DMG (Opcional)
+      if: success()
+      run: |
+        cd build/dist
+        # Crear estructura para DMG
+        mkdir -p LipidosAnalyzer.app/Contents/MacOS
+        cp LipidosAnalyzer LipidosAnalyzer.app/Contents/MacOS/
+        
+        # Crear DMG
+        hdiutil create -volname "Lipidos Analyzer" \
+                      -srcfolder LipidosAnalyzer.app \
+                      -ov -format UDZO \
+                      LipidosAnalyzer.dmg
+        
+        ls -la *.dmg
+    
+    - name: Upload DMG
+      if: success()
+      uses: actions/upload-artifact@v4
+      with:
+        name: LipidosAnalyzer-DMG
+        path: build/dist/LipidosAnalyzer.dmg
+        retention-days: 7
